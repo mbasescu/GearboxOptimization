@@ -23,7 +23,8 @@ rho = 0.284; % lb/in^3 (density of gears)
 totRatio = 7.1; % Input to output gear ratio
 pressureAngle = 20; % Degrees
 
-global stepSize = 0.1; % Determines accuracy/speed of optimization
+global stepSize; % Determines accuracy/speed of optimization
+stepSize = 0.1;
 
 % Set up gear variables
 currentRatio = 2; % Ratio of first gear set
@@ -31,7 +32,7 @@ currentRatio = 2; % Ratio of first gear set
 % Table of current gear properties
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
 gearData = [4,19,1,1;6,52,1,1;1.8,19,2,1;6,52,2,1];
-gearData(:, 4) = getKE(gearData, currentRatio); % TODO: modify getKE to return proper formatting
+gearData(:, 4) = getKE(gearData); % TODO: modify getKE to return proper formatting
 
 % Counters
 % storeFirst = 0; % Tells the innermost loop whether or not to store data before stepping its parameter
@@ -41,3 +42,5 @@ global trialStruct;
 trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 corresponds to success
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
+
+minKE = stepD1(1, gearData, [0, 0])

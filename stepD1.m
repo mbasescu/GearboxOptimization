@@ -63,6 +63,9 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
+
+% Grab updated information
+steppedGearData(:, 4) = getKE(steppedGearData);
 steppedFailState = findStress(steppedGearData);
 
 % Check if done iterating, and set finished if so
