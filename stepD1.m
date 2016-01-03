@@ -51,7 +51,7 @@ end
 trialArray = [trialArray trialStruct];
 
 % STEP PARAMETER
-% GET INFO ABOUT NEW DATA SET
+% GET INFO ABOUT NEW DATA SET INCLUDING KE AND FAILURE
 % CHECK IF DONE ITERATING, SET FINISHED IF SO
 
 % If finished with this step of optimization, pop back up to the first
