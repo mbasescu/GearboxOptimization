@@ -1,4 +1,4 @@
-function [ minFaceWidth ] = calcStress(  pitch, gear1Teeth, gear2Teeth, currentRatio)
+function [ minFaceWidth ] = calcStress(pitch, gear1Teeth, gear2Teeth, currentRatio)
 %findStress Summary of this function goes here
 %   Erez wrote it. ask him when you can't figure it out. 
 %% Input Variables (mess around with this later)
@@ -48,8 +48,6 @@ minFaceWidth = gearWidthCalculator(torque,RPM,phi,pitch,gear1,gear2);
 % contact_stress = Cp*sqrt(Ft*Ko*Kv*Ks*(Km/(dp*W))*(Cf/I));
 % 
 % 
-
-
 
 end
 
