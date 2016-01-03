@@ -28,12 +28,13 @@ finished = 0;
 % Declare globals
 global trialStruct;
 global trialArray;
+global stepSize;
 
 % If this function is not currently recursing
 if firstInstance
-    % PSEUDOCODE, FIX WITH REAL ARGS AND FUNCS
-    failState = findStress(arg1, arg2);
-    gearData(:, 4) = getKE(arg1, arg2);
+    % Grab information about the gear set
+    failState = findStress(gearData);
+    gearData(:, 4) = getKE(gearData);
 end 
 
 % Store stuff
@@ -50,15 +51,30 @@ end
 % Stick into array
 trialArray = [trialArray trialStruct];
 
-% STEP PARAMETER
-% GET INFO ABOUT NEW DATA SET INCLUDING KE AND FAILURE
-% CHECK IF DONE ITERATING, SET FINISHED IF SO
+% Decide which way and how much to step
+if firstInstance % First time through, just go bigger
+    change = stepSize;
+elseif failState(1) ~= 0 % If failed, go bigger
+    change = stepSize;
+else % Go smaller in all other cases
+    change = -stepSize;
+end
+
+% Step the parameter
+steppedGearData = gearData;
+steppedGearData(1, 1) = gearData(1, 1) + change;
+steppedFailState = findStress(steppedGearData);
+
+% Check if done iterating, and set finished if so
+if failState(1) ~= 0 && steppedFailState(1) == 0
+    finished = 1;
+end
 
 % If finished with this step of optimization, pop back up to the first
 % instance of this recursive function
 if finished
     ke = sum(steppedGearData(:, 4));
-    % Store before returning because we won't 
+    % Store before returning
     trialStruct.gearData = steppedGearData;
     trialStruct.keTot = ke;
     trialStruct.success = 1;

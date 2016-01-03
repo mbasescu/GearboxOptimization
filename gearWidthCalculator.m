@@ -1,14 +1,14 @@
-function [ faceWidth ] = gearWidthCalculator(torque, RPM,phi, pitch, gear1, gear2 )
+function [ faceWidth ] = gearWidthCalculator(torque, RPM, phi, pitch, gear1, gear2 )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
-W= sym('W');
+W = sym('W');
 
 gear1teeth=gear1.teeth;
 gear2teeth=gear2.teeth;
 
 %check for gear 1 
-Sf= 1.3; % safety factor 
-Yn =1; %inifinite life design, 
+Sf = 1.3; % safety factor 
+Yn = 1; %inifinite life design, 
 Kt = 1; %temperature factor
 Kr = 1; % reliability factor
 %maxAllowableBending1 = (gear1.yield/Sf)*(Yn /(Kt*Kr)); %brought down to
@@ -16,15 +16,15 @@ Kr = 1; % reliability factor
 %maxAllowableBending2 = (gear2.yield/Sf)*(Yn /(Kt*Kr));
 
 % First do bending, first gear
-dp1 =  gear1teeth/pitch;
+dp1 = gear1teeth/pitch;
 F = (torque/(dp1/2));
-Ko =1; %Overload Factor 
+Ko = 1; %Overload Factor 
 %Velocity Factor 
-Qv =7; % quality factor for baja type gears 
-B =.25*(12-Qv)^(2/3);
+Qv = 7; % quality factor for baja type gears 
+B = .25*(12-Qv)^(2/3);
 A = 50 + 56*(1-B);
 V = pi* dp1 * RPM/12 ; % same for both gears  
-Kv= ((A + sqrt(V))/A)^B;
+Kv = ((A + sqrt(V))/A)^B;
 
 % size factor
 
@@ -34,7 +34,7 @@ Cpf1 = (W/(10*dp1)) - .25 ; % DOUBLE CHECK THIS ONE
 Cma1 = .125; % approx, could write as function of W
 Cpm1 = 1.05;
 Ce1 = 1; 
-Cmc1 =1;
+Cmc1 = 1;
 Km1 = 1 + Cmc1*(Cpf1*Cpm1 + Cma1*Ce1);
     %display(Km1);
 %Rim thickness factor 
@@ -52,7 +52,7 @@ Cpf2 = (sym('W')/(10*dp2)) - .25 ; % DOUBLE CHECK THIS ONE
 Cma2 = .125; % approx, could write as function of W
 Cpm2 = 1.05;
 Ce2 = 1; 
-Cmc2 =1;
+Cmc2 = 1;
 Km2 = 1 + Cmc2*(Cpf2*Cpm2 + Cma2*Ce2);
     %display(Km2);
 %Rim thickness factor 
@@ -74,14 +74,14 @@ maxAllowableContact1 = (Sc1/Sf)*(Zn*Ch)/(Kt*Kr);
 maxAllowableContact2 = (Sc2/Sf)*(Zn*Ch)/(Kt*Kr);
 
 %% 
-Cf1 =1; %dont have a good figure
-Cf2 =1;
+Cf1 = 1; %dont have a good figure
+Cf2 = 1;
 mg = gear2teeth/gear1teeth;
-I =(mg/(mg+1))*cosd(phi)*sind(phi)/2;
-Cp =sqrt(1/(pi*( ( (1-.3^2)/gear1.youngs )+ ( (1-.3^2)/gear2.youngs ) )) );
+I = (mg/(mg+1))*cosd(phi)*sind(phi)/2;
+Cp = sqrt(1/(pi*( ( (1-.3^2)/gear1.youngs )+ ( (1-.3^2)/gear2.youngs ) )) );
 %    display(Cp);
 
-looped=zeros(1,4);
+looped = zeros(1,4);
 for i=1:4
     if i==5
         Y1 = lewisFactor(gear1teeth);
@@ -114,8 +114,8 @@ for i=1:4
       
     end
 end
+
     faceWidth = max([looped(1);looped(2);looped(3);looped(4)]);
-
-
+    
 end
 

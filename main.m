@@ -23,7 +23,7 @@ rho = 0.284; % lb/in^3 (density of gears)
 totRatio = 7.1; % Input to output gear ratio
 pressureAngle = 20; % Degrees
 
-stepSize = 0.1; % Determines accuracy/speed of optimization
+global stepSize = 0.1; % Determines accuracy/speed of optimization
 
 % Set up gear variables
 currentRatio = 2; % Ratio of first gear set
