@@ -1,12 +1,8 @@
 function [ke] = stepD1(firstInstance, gearData, failState)
 % stepD1(storeFirst, gearData) -
 %
-% This function takes two inputs:
-
-% % USE FOR HIGHER LEVEL FUNCTIONS - 'storeFirst' determines whether to step this parameter immediately or to
-% % store the trial before stepping.  It is a boolean value: 1 means yes, 0
-% % means no.
-
+% This function takes three inputs:
+%
 % - 'firstInstance' is a boolean (0 or 1) describing whether or not this
 % function is being called from a higher level function, or whether it is
 % recursing
@@ -63,10 +59,16 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
+steppedGearData = ratios(steppedGearData);
 
 % Grab updated information
-steppedGearData(:, 4) = getKE(steppedGearData);
-steppedFailState = findStress(steppedGearData);
+if steppedGearData(1, 1) == 0 % If ratios could not be performed
+    steppedFailState = [-1, -1];
+    steppedGearData(:, 4) = 9999999;
+else
+    steppedFailState = findStress(steppedGearData);
+    steppedGearData(:, 4) = getKE(steppedGearData);
+end
 
 % Check if done iterating, and set finished if so
 if failState(1) ~= 0 && steppedFailState(1) == 0

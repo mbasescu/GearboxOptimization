@@ -23,13 +23,18 @@ rho = 0.284; % lb/in^3 (density of gears)
 totRatio = 7.1; % Input to output gear ratio
 pressureAngle = 20; % Degrees
 
+% Globals 
 global stepSize; % Determines accuracy/speed of optimization
 stepSize = 0.1;
+global pitch1;
+pitch1 = 10;
+global pitch2;
+pitch2 = 10;
 
 % Set up gear variables
 currentRatio = 2; % Ratio of first gear set
 
-% Table of current gear properties
+% Table of initial gear properties
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
 gearData = [4,19,1,1;6,52,1,1;1.8,19,2,1;6,52,2,1];
 gearData(:, 4) = getKE(gearData); % TODO: modify getKE to return proper formatting
