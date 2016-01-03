@@ -34,7 +34,7 @@ if test(1,1)<1.5 || test(2,1)<1.5 || test(3,1)<1.5 || test(4,1)<1.5
     test=[0,0;0,0;0,0;0,0];
 end
 
-% gearData(:,1:2)=test;
+gearData(:,1:2)=test;
 
 end
 
