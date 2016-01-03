@@ -1,4 +1,4 @@
-function [ke] = stepD1(firstInstance, gearData, failState)
+function [ke, failed] = stepD1(firstInstance, gearData, failState)
 % stepD1(storeFirst, gearData) -
 %
 % This function takes three inputs:
@@ -20,6 +20,7 @@ function [ke] = stepD1(firstInstance, gearData, failState)
 
 % Setup/initialization
 finished = 0;
+failed = 0;
 
 % Declare globals
 global trialStruct;
@@ -40,7 +41,13 @@ trialStruct.keTot = sum(gearData(:, 4));
 % Set success parameter based on failure of each gear set
 if failState(1) == 0 && failState(2) == -8
     trialStruct.success = 1;
-else 
+elseif failState(2) ~= -8 && firstInstance % Failed from D2
+    trialStruct.success = 0;
+    trialArray = [trialArray trialStruct];
+    ke = trialStruct.keTot;
+    failed = 1;
+    return;
+else
     trialStruct.success = 0;
 end
 
@@ -50,7 +57,7 @@ trialArray = [trialArray trialStruct];
 % Decide which way and how much to step
 if firstInstance % First time through, just go bigger
     change = stepSize;
-elseif failState(1) ~= 0 % If failed, go bigger
+elseif failState(1) > 0 || failState(1) == -1 % If failed from stress (or too small for ratios), go bigger
     change = stepSize;
 else % Go smaller in all other cases
     change = -stepSize;
@@ -59,19 +66,21 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
-steppedGearData = ratios(steppedGearData);
+steppedGearDataTemp = ratios(steppedGearData);
 
 % Grab updated information
-if steppedGearData(1, 1) == 0 % If ratios could not be performed
+if steppedGearDataTemp(1, 1) == -1 % If stuff was too small for ratios
     steppedFailState = [-1, -1];
-    steppedGearData(:, 4) = 9999999;
+elseif steppedGearDataTemp(1, 1) == -2 % If stuff was too big for ratios
+    steppedFailState = [-2, -2];
 else
     steppedFailState = findStress(steppedGearData);
-    steppedGearData(:, 4) = getKE(steppedGearData);
 end
 
+steppedGearData(:, 4) = getKE(steppedGearData);
+
 % Check if done iterating, and set finished if so
-if failState(1) ~= 0 && steppedFailState(1) == 0
+if failState(1) > 0 && steppedFailState(1) == 0
     finished = 1;
 end
 
@@ -87,7 +96,7 @@ if finished
     return;
 else 
     % Recurse if we're not done yet
-    ke = stepD1(0, steppedGearData, steppedFailState);
+    [ke, failed] = stepD1(0, steppedGearData, steppedFailState);
 end
 
 end

@@ -25,13 +25,16 @@ test=[gearData(1,1), gear1tooth; ...
     gear2diam, gear2tooth; gearData(3,1), gear3tooth; ...
     gear4diam, gear4tooth];
 
-if ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) > 10 ...
-    || ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) < 3 
-    test=[0,0;0,0;0,0;0,0];
-end
+% If total length is too big
+if ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) > 10
+    test=[-2,-2;-2,-2;-2,-2;-2,-2];
+% If total length is too small
+elseif ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) < 3 
+    test=[-1,-1;-1,-1;-1,-1;-1,-1];
+    
 %% check for center to center distances
-if test(1,1)<1.5 || test(2,1)<1.5 || test(3,1)<1.5 || test(4,1)<1.5
-    test=[0,0;0,0;0,0;0,0];
+elseif test(1,1)<1.5 || test(2,1)<1.5 || test(3,1)<1.5 || test(4,1)<1.5
+    test=[-1,-1;-1,-1;-1,-1;-1,-1];
 end
 
 gearData(:,1:2)=test;

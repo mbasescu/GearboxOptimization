@@ -14,9 +14,9 @@ clc; clear all; close all;
 % INSERT CODE HERE
 
 % Set up parallel pool (faster?)
-myFiles = {'main.m', 'findStress.m', 'calcStress.m', 'gearWidthCalculator.m'};
-poolobj = gcp;
-addAttachedFiles(poolobj, myFiles);
+%myFiles = {'main.m', 'findStress.m', 'calcStress.m', 'gearWidthCalculator.m'};
+%poolobj = gcp;
+%addAttachedFiles(poolobj, myFiles);
 
 % Define constant values
 rho = 0.284; % lb/in^3 (density of gears)
@@ -36,8 +36,8 @@ currentRatio = 2; % Ratio of first gear set
 
 % Table of initial gear properties
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
-gearData = [4,19,1,1;6,52,1,1;1.8,19,2,1;6,52,2,1];
-gearData(:, 4) = getKE(gearData); % TODO: modify getKE to return proper formatting
+gearData = [4,19,1,1;6,52,1,1;2.8,19,2,1;6,52,2,1];
+gearData(:, 4) = getKE(gearData);
 
 % Counters
 % storeFirst = 0; % Tells the innermost loop whether or not to store data before stepping its parameter
@@ -48,4 +48,4 @@ trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 co
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
 
-minKE = stepD1(1, gearData, [0, 0])
+[minKE, failed] = stepD1(1, gearData, [0, 0])
