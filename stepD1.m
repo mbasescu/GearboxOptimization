@@ -40,7 +40,18 @@ trialStruct.keTot = sum(gearData(:, 4));
 
 % Set success parameter based on failure of each gear set
 if failState(1) == 0 && failState(2) == -8
+    % If it's the first time through, check that we didn't force ratios to
+    % work
+    if firstInstance
+        ratioTest = ratios(gearData, 0);
+        if ratioTest(1,1) < 0
+            trialStruct.success = 0;
+        else
+            trialStruct.success = 1;
+        end
+    else
     trialStruct.success = 1;
+    end
 elseif failState(2) ~= -8 && firstInstance % Failed from D2
     trialStruct.success = 0;
     trialArray = [trialArray trialStruct];
@@ -66,7 +77,7 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
-steppedGearDataTemp = ratios(steppedGearData);
+steppedGearDataTemp = ratios(steppedGearData, 0);
 
 % Grab updated information
 if steppedGearDataTemp(1, 1) == -1 % If stuff was too small for ratios

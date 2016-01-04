@@ -1,4 +1,4 @@
-function [ gearData ] = ratios(gearData)
+function [ gearData ] = ratios(gearData, force)
 %ratios Takes the current gear Ratio, and a table of gear data and outputs
 %the correct corresponding Number of teeth, and Pitch Diamaters to make the
 %ratios work out properly. 
@@ -25,19 +25,20 @@ test=[gearData(1,1), gear1tooth; ...
     gear2diam, gear2tooth; gearData(3,1), gear3tooth; ...
     gear4diam, gear4tooth];
 
-% If total length is too big
-if ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) > 10
-    test=[-2,-2;-2,-2;-2,-2;-2,-2];
-% If total length is too small
-elseif ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) < 3 
-    test=[-1,-1;-1,-1;-1,-1;-1,-1];
-    
-%% check for center to center distances
-elseif test(1,1)<1.5 || test(2,1)<1.5 || test(3,1)<1.5 || test(4,1)<1.5
-    test=[-1,-1;-1,-1;-1,-1;-1,-1];
+if force ~= 1
+    % If total length is too big
+    if ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) > 10
+        test=[-2,-2;-2,-2;-2,-2;-2,-2];
+    % If total length is too small
+    elseif ((test(1,1)/2) + (test(2,1)/2) - (test(3,1)/2) + (test(4,1)/2)) < 3 
+        test=[-1,-1;-1,-1;-1,-1;-1,-1];
+
+    %% check for center to center distances
+    elseif test(1,1)<1.5 || test(2,1)<1.5 || test(3,1)<1.5 || test(4,1)<1.5
+        test=[-1,-1;-1,-1;-1,-1;-1,-1];
+    end
 end
 
-gearData(:,1:2)=test;
-
+    gearData(:,1:2)=test;
 end
 

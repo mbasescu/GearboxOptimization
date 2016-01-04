@@ -1,4 +1,4 @@
-function [ke] = stepD2(firstInstance, gearData, failState)
+function [ke, failed] = stepD2(firstInstance, gearData, failState)
 % stepD2(storeFirst, gearData) -
 %
 % This function takes three inputs:
@@ -20,6 +20,7 @@ function [ke] = stepD2(firstInstance, gearData, failState)
 
 % Setup/initialization
 finished = 0;
+failed = 0;
 
 % Declare globals
 global trialStruct;
@@ -29,13 +30,21 @@ global stepSize;
 % If this function is not currently recursing
 if firstInstance
     % Optimize over current state first
-    keLast = stepD1(1, gearData, [0, 0]);
+    gearDataTemp = ratios(gearData, 1);
+    [keLast, subFailedLast] = stepD1(1, gearDataTemp, [0, 0]);
+
+    % Set the initial failure state
+    if subFailedLast
+        failState = 1;
+    else
+        failState = 0;
+    end
 end
 
 % Decide which way and how much to step
 if firstInstance % First time through, just go bigger
     change = stepSize;
-elseif failState(1) ~= 0 % If failed, go bigger
+elseif failState > 0 % If failed from stress or too small for ratios, go bigger
     change = stepSize;
 else % Go smaller in all other cases
     change = -stepSize;
@@ -44,32 +53,34 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(3, 1) = gearData(3, 1) + change;
-
-% Reoptimize lower level parameter
-keCurr = stepD1(1, gearData, [0, 0]);
+steppedGearDataTemp = ratios(steppedGearData, 1);
 
 % Grab updated information
-steppedGearData(:, 4) = getKE(steppedGearData);
-steppedFailState = findStress(steppedGearData);
+% First check we're within certain bounds
+if steppedGearData(3,1) < 1.5
+    steppedFailState = 2;
+elseif steppedGearData(3,1) > 8
+    steppedFailState = -1;
+elseif steppedGearDataTemp(1, 1) > 0
+    % Iterate lower parameters
+    [keCurr, steppedFailState] = stepD1(1, steppedGearDataTemp, [0, 0]);
+else 
+end
+
 
 % Check if done iterating, and set finished if so
-if failState(1) ~= 0 && steppedFailState(1) == 0
+if failState > 0 && steppedFailState == 0
     finished = 1;
 end
 
 % If finished with this step of optimization, pop back up to the first
 % instance of this recursive function
 if finished
-    ke = sum(steppedGearData(:, 4));
-    % Store before returning
-    trialStruct.gearData = steppedGearData;
-    trialStruct.keTot = ke;
-    trialStruct.success = 1;
-    trialArray = [trialArray trialStruct];
+    failed = 0;
+    ke = keCurr;
     return;
 else 
     % Recurse if we're not done yet
-    ke = stepD1(0, steppedGearData, steppedFailState);
+    [ke, failed] = stepD2(0, steppedGearData, steppedFailState);
 end
 
-end

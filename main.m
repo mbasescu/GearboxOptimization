@@ -48,4 +48,4 @@ trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 co
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
 
-[minKE, failed] = stepD1(1, gearData, [0, 0])
+[minKE, failed] = stepD2(1, gearData, [0, 0])
