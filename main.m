@@ -48,4 +48,20 @@ trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 co
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
 
+% Perform optimization
 [minKE, failed] = stepD2(1, gearData, [0, 0])
+
+successfulTrials = [];
+failedTrials = [];
+
+hold on;
+% Identify succesful trials and unsuccessful trials, plot success in red
+% and failure in black
+for i = 1:length(trialArray)
+    if trialArray(i).success
+        plot(i, trialArray(i).keTot, 'ro');
+    else 
+        plot(i, trialArray(i).keTot, 'ko');
+    end
+end
+hold off;
