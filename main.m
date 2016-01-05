@@ -59,8 +59,10 @@ hold on;
 % and failure in black
 for i = 1:length(trialArray)
     if trialArray(i).success && checkConstraints([trialArray(i).gearData])
+        successfulTrials = [successfulTrials trialArray(i)];
         plot(i, trialArray(i).keTot, 'ro');
     else 
+        failedTrials = [failedTrials trialArray(i)];
         plot(i, trialArray(i).keTot, 'ko');
     end
 end
