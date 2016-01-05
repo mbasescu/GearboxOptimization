@@ -58,7 +58,7 @@ hold on;
 % Identify succesful trials and unsuccessful trials, plot success in red
 % and failure in black
 for i = 1:length(trialArray)
-    if trialArray(i).success
+    if trialArray(i).success && checkConstraints([trialArray(i).gearData])
         plot(i, trialArray(i).keTot, 'ro');
     else 
         plot(i, trialArray(i).keTot, 'ko');

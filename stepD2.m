@@ -30,7 +30,7 @@ global stepSize;
 % If this function is not currently recursing
 if firstInstance
     % Optimize over current state first
-    gearDataTemp = ratios(gearData, 1);
+    gearDataTemp = ratios(gearData);
     [keLast, subFailedLast] = stepD1(1, gearDataTemp, [0, 0]);
 
     % Set the initial failure state
@@ -44,7 +44,7 @@ end
 % Decide which way and how much to step
 if firstInstance % First time through, just go bigger
     change = stepSize;
-elseif failState > 0 % If failed from stress or too small for ratios, go bigger
+elseif failState ~= 0 || gearData(3, 1) < 1.5 % If failed from stress or too small, go bigger
     change = stepSize;
 else % Go smaller in all other cases
     change = -stepSize;
@@ -53,23 +53,20 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(3, 1) = gearData(3, 1) + change;
-steppedGearDataTemp = ratios(steppedGearData, 1);
+steppedGearData = ratios(steppedGearData);
 
 % Grab updated information
 % First check we're within certain bounds
-if steppedGearData(3,1) < 1.5
-    steppedFailState = 2;
-elseif steppedGearData(3,1) > 8
-    steppedFailState = -1;
-elseif steppedGearDataTemp(1, 1) > 0
+if steppedGearData(3,1) < 1.5 || steppedGearData(3,1) > 8
+    steppedFailState = 1;
+else
     % Iterate lower parameters
-    [keCurr, steppedFailState] = stepD1(1, steppedGearDataTemp, [0, 0]);
-else 
+    [keCurr, steppedFailState] = stepD1(1, steppedGearData, [0, 0]);
 end
 
 
 % Check if done iterating, and set finished if so
-if failState > 0 && steppedFailState == 0
+if failState == 1 && steppedFailState == 0
     finished = 1;
 end
 

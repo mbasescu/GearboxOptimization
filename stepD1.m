@@ -30,7 +30,11 @@ global stepSize;
 % If this function is not currently recursing
 if firstInstance
     % Grab information about the gear set
-    failState = findStress(gearData);
+    if gearData(1, 1) < 1.5
+        failState = [1, 1];
+    else
+        failState = findStress(gearData);
+    end
     gearData(:, 4) = getKE(gearData);
 end 
 
@@ -40,18 +44,7 @@ trialStruct.keTot = sum(gearData(:, 4));
 
 % Set success parameter based on failure of each gear set
 if failState(1) == 0 && failState(2) == -8
-    % If it's the first time through, check that we didn't force ratios to
-    % work
-    if firstInstance
-        ratioTest = ratios(gearData, 0);
-        if ratioTest(1,1) < 0
-            trialStruct.success = 0;
-        else
-            trialStruct.success = 1;
-        end
-    else
     trialStruct.success = 1;
-    end
 elseif failState(2) ~= -8 && firstInstance % Failed from D2
     trialStruct.success = 0;
     trialArray = [trialArray trialStruct];
@@ -68,7 +61,7 @@ trialArray = [trialArray trialStruct];
 % Decide which way and how much to step
 if firstInstance % First time through, just go bigger
     change = stepSize;
-elseif failState(1) > 0 || failState(1) == -1 % If failed from stress (or too small for ratios), go bigger
+elseif failState(1) > 0 || gearData(1, 1) < 1.5 % If failed from stress or too small, go bigger
     change = stepSize;
 else % Go smaller in all other cases
     change = -stepSize;
@@ -77,17 +70,14 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
-steppedGearDataTemp = ratios(steppedGearData, 0);
+steppedGearData = ratios(steppedGearData);
 
 % Grab updated information
-if steppedGearDataTemp(1, 1) == -1 % If stuff was too small for ratios
-    steppedFailState = [-1, -1];
-elseif steppedGearDataTemp(1, 1) == -2 % If stuff was too big for ratios
-    steppedFailState = [-2, -2];
+if steppedGearData(1, 1) < 1.5
+    steppedFailState = [1, 1];
 else
     steppedFailState = findStress(steppedGearData);
 end
-
 steppedGearData(:, 4) = getKE(steppedGearData);
 
 % Check if done iterating, and set finished if so
