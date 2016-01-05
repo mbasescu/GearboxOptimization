@@ -10,9 +10,6 @@ Units are American Standard
 % Start fresh
 clc; clear all; close all;
 
-% Clear all static variables manually (not sure if necessary)
-% INSERT CODE HERE
-
 % Set up parallel pool (faster?)
 %myFiles = {'main.m', 'findStress.m', 'calcStress.m', 'gearWidthCalculator.m'};
 %poolobj = gcp;
@@ -38,9 +35,6 @@ currentRatio = 2; % Ratio of first gear set
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
 gearData = [4,19,1,1;6,52,1,1;2.8,19,2,1;6,52,2,1];
 gearData(:, 4) = getKE(gearData);
-
-% Counters
-% storeFirst = 0; % Tells the innermost loop whether or not to store data before stepping its parameter
 
 % Data structures to store each optimization trial
 global trialStruct;
