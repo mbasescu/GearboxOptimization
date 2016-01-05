@@ -22,5 +22,71 @@ function [ke, failed] = stepRatio(firstInstance, gearData, failState)
 finished = 0;
 failed = 0;
 
+% Declare globals
+global trialStruct;
+global trialArray;
+global stepSize;
+persistent keBeforeLast;
+persistent ratioBeforeLast;
+
+% First find information about last time's gear set
+lastRatio = gearData(2, 1) / gearData(1, 1);
+keLast = sum(getKE(gearData));
+
+% If this function is not currently recursing
+if firstInstance
+    % Optimize over current state first
+    gearData = ratios(gearData);
+    lastRatio = gearData(2, 1) / gearData(1, 1);
+    [keLast, subFailedLast] = stepD2(1, gearData, [0, 0]);
+    keBeforeLast = keLast;
+    ratioBeforeLast = lastRatio;
+
+    % Set the initial failure state
+    if subFailedLast
+        failState = 1;
+    else
+        failState = 0;
+    end
+end
+
+% Decide which way and how much to step
+if firstInstance % First time through, just go bigger
+    change = stepSize;
+elseif keLast < keBeforeLast % Keep going in the same direction if ke is decreasing
+    change = sign(lastRatio - ratioBeforeLast)*stepSize;
+elseif keLast > keBeforeLast % If ke is getting worse, go in the other direction
+    change = -sign(lastRatio - ratioBeforeLast)*stepSize;
+elseif keLast == keBeforeLast
+    % CLEAN UP AND LEAVE
+end
+
+% Step the ratio
+steppedRatio = lastRatio + change;
+steppedGearData = ratios(gearData, steppedRatio);
+
+% Now optimize over this new ratio
+[keCurr, steppedFailState] = stepD2(1, steppedGearData, [0, 0]);
+
+% If last time we failed and had a lower kinetic energy, this is the best
+% we're going to get
+if steppedFailState == 0 && keCurr > keLast
+    finished = 1;
+end
+
+% Set the before last values
+ratioBeforeLast = lastRatio;
+keBeforeLast = keLast;
+
+% If finished with this step of optimization, pop back up to the first
+% instance of this recursive function
+if finished
+    failed = 0;
+    ke = keCurr;
+    return;
+else 
+    % Recurse if we're not done yet
+    [ke, failed] = stepD2(0, steppedGearData, steppedFailState);
+end
 
 end

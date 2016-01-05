@@ -1,4 +1,4 @@
-function [ gearData ] = ratios(gearData)
+function [ gearData ] = ratios(gearData, currentRatio)
 %ratios Takes the current gear Ratio, and a table of gear data and outputs
 %the correct corresponding Number of teeth, and Pitch Diamaters to make the
 %ratios work out properly. 
@@ -8,8 +8,15 @@ function [ gearData ] = ratios(gearData)
 %   to center distance is out of the acceptable range (defined in this
 %   function) or if any 1 gear has too small of a diamater the code will
 %   return a table full of 0s. This will indicate to the driver that what
-%   it sent was invalid, and that diffrent initial values should be tried8
-ratio1 = gearData(2, 1) / gearData(1, 1);
+%   it sent was invalid, and that diffrent initial values should be tried
+
+% If a ratio is supplied, use that, otherwise use the ratio in the gearData
+if ~exist('currentRatio')
+    ratio1 = gearData(2, 1) / gearData(1, 1);
+else
+    ratio1 = currentRatio;
+end
+
 ratio2 = 7.1 / ratio1;
 global pitch1;
 global pitch2;

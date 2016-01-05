@@ -31,8 +31,8 @@ global stepSize;
 % If this function is not currently recursing
 if firstInstance
     % Optimize over current state first
-    gearDataTemp = ratios(gearData);
-    [keLast, subFailedLast] = stepD1(1, gearDataTemp, [0, 0]);
+    gearData = ratios(gearData);
+    [keLast, subFailedLast] = stepD1(1, gearData, [0, 0]);
 
     % Set the initial failure state
     if subFailedLast

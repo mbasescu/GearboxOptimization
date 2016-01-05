@@ -43,7 +43,7 @@ global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
 
 % Perform optimization
-[minKE, failed] = stepD2(1, gearData, [0, 0])
+[minKE, failed] = stepRatio(1, gearData, [0, 0])
 
 successfulTrials = [];
 failedTrials = [];
