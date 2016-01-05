@@ -26,12 +26,12 @@ failed = 0;
 global trialStruct;
 global trialArray;
 global stepSize;
+persistent keLast;
 persistent keBeforeLast;
 persistent ratioBeforeLast;
 
 % First find information about last time's gear set
 lastRatio = gearData(2, 1) / gearData(1, 1);
-keLast = sum(getKE(gearData));
 
 % If this function is not currently recursing
 if firstInstance
@@ -70,13 +70,14 @@ steppedGearData = ratios(gearData, steppedRatio);
 
 % If last time we failed and had a lower kinetic energy, this is the best
 % we're going to get
-if steppedFailState == 0 && keCurr > keLast
+if steppedFailState == 0 && keCurr > keLast && keCurr < keBeforeLast
     finished = 1;
 end
 
 % Set the before last values
 ratioBeforeLast = lastRatio;
 keBeforeLast = keLast;
+keLast = keCurr;
 
 % If finished with this step of optimization, pop back up to the first
 % instance of this recursive function
@@ -86,7 +87,7 @@ if finished
     return;
 else 
     % Recurse if we're not done yet
-    [ke, failed] = stepD2(0, steppedGearData, steppedFailState);
+    [ke, failed] = stepRatio(0, steppedGearData, steppedFailState);
 end
 
 end
