@@ -1,5 +1,5 @@
 function [ke, failed] = stepD2(firstInstance, gearData, failState)
-% stepD2(storeFirst, gearData) -
+% stepD2(firstInstance, gearData, failState) -
 %
 % This function takes three inputs:
 % 
@@ -16,7 +16,8 @@ function [ke, failed] = stepD2(firstInstance, gearData, failState)
 %
 % Once finished recursing, this function returns 'ke', the minimum value of kinetic energy it has
 % achieved before leaving this level of recursion (popping back up to the
-% next highest parameter).
+% next highest parameter).  However, if a choice could not be made for this
+% parameter that prevents failure, the second return value will be set to 1
 
 % Setup/initialization
 finished = 0;
