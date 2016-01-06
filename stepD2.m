@@ -27,12 +27,15 @@ failed = 0;
 global trialStruct;
 global trialArray;
 global stepSize;
+global currentRatio;
 
 % If this function is not currently recursing
 if firstInstance
     % Optimize over current state first
-    gearData = ratios(gearData);
+    gearData = ratios(gearData, currentRatio);
     [keLast, subFailedLast] = stepD1(1, gearData, [0, 0]);
+    gearDataTemp = [trialStruct.gearData];
+    gearData(1, 1) = gearDataTemp(1, 1);
 
     % Set the initial failure state
     if subFailedLast
@@ -54,7 +57,7 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(3, 1) = gearData(3, 1) + change;
-steppedGearData = ratios(steppedGearData);
+steppedGearData = ratios(steppedGearData, currentRatio);
 
 % Grab updated information
 % First check we're within certain bounds

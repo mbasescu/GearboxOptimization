@@ -1,5 +1,5 @@
 function [ke, failed] = stepRatio(firstInstance, gearData, failState)
-% stepRatio(storeFirst, gearData) -
+% stepRatio(firstInstance, gearData, failState) -
 %
 % This function takes three inputs:
 % 
@@ -26,21 +26,36 @@ failed = 0;
 global trialStruct;
 global trialArray;
 global stepSize;
+global currentRatio;
 persistent keLast;
 persistent keBeforeLast;
 persistent ratioBeforeLast;
+persistent keHist; % History of kinetic energies
+persistent counter;
+if isempty(counter)
+    counter = 0;
+end
+
+counter = counter + 1
 
 % First find information about last time's gear set
-lastRatio = gearData(2, 1) / gearData(1, 1);
+ratioLast = gearData(2, 1) / gearData(1, 1);
 
 % If this function is not currently recursing
 if firstInstance
     % Optimize over current state first
-    gearData = ratios(gearData);
-    lastRatio = gearData(2, 1) / gearData(1, 1);
+    gearData = ratios(gearData, currentRatio);
+    ratioLast = gearData(2, 1) / gearData(1, 1);
     [keLast, subFailedLast] = stepD2(1, gearData, [0, 0]);
+    keHist = [keHist, keLast];
+    
+    % Save best diameters
+    gearDataTemp = [trialStruct.gearData];
+    gearData(1, 1) = gearDataTemp(1, 1);
+    gearData(3, 1) = gearDataTemp(3, 1);
+    
     keBeforeLast = keLast;
-    ratioBeforeLast = lastRatio;
+    ratioBeforeLast = ratioLast;
 
     % Set the initial failure state
     if subFailedLast
@@ -54,36 +69,39 @@ end
 if firstInstance % First time through, just go bigger
     change = stepSize;
 elseif keLast < keBeforeLast % Keep going in the same direction if ke is decreasing
-    change = sign(lastRatio - ratioBeforeLast)*stepSize;
+    change = sign(ratioLast - ratioBeforeLast)*stepSize;
 elseif keLast > keBeforeLast % If ke is getting worse, go in the other direction
-    change = -sign(lastRatio - ratioBeforeLast)*stepSize;
+    change = -sign(ratioLast - ratioBeforeLast)*stepSize;
 elseif keLast == keBeforeLast
     % CLEAN UP AND LEAVE
 end
 
 % Step the ratio
-steppedRatio = lastRatio + change;
+steppedRatio = ratioLast + abs(change);
+currentRatio = steppedRatio;
 steppedGearData = ratios(gearData, steppedRatio);
 
 % Now optimize over this new ratio
 [keCurr, steppedFailState] = stepD2(1, steppedGearData, [0, 0]);
 
-% If last time we failed and had a lower kinetic energy, this is the best
-% we're going to get
-if steppedFailState == 0 && keCurr > keLast && keCurr < keBeforeLast
+% If the lowest kinetic energy has not been updated for at least 7 iterations, kick out
+minIndices = find(keHist == min(keHist));
+minIndex = minIndices(end);
+if minIndex <= length(keHist) - 7
     finished = 1;
 end
 
 % Set the before last values
-ratioBeforeLast = lastRatio;
+ratioBeforeLast = ratioLast;
 keBeforeLast = keLast;
 keLast = keCurr;
+keHist = [keHist, keLast];
 
 % If finished with this step of optimization, pop back up to the first
 % instance of this recursive function
 if finished
     failed = 0;
-    ke = keCurr;
+    ke = min(keHist);
     return;
 else 
     % Recurse if we're not done yet

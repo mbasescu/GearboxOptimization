@@ -27,6 +27,7 @@ failed = 0;
 global trialStruct;
 global trialArray;
 global stepSize;
+global currentRatio;
 
 % If this function is not currently recursing
 if firstInstance
@@ -71,7 +72,7 @@ end
 % Step the parameter
 steppedGearData = gearData;
 steppedGearData(1, 1) = gearData(1, 1) + change;
-steppedGearData = ratios(steppedGearData);
+steppedGearData = ratios(steppedGearData, currentRatio);
 
 % Grab updated information
 if steppedGearData(1, 1) < 1.5

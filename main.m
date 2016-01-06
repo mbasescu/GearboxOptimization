@@ -28,12 +28,9 @@ pitch1 = 10;
 global pitch2;
 pitch2 = 10;
 
-% Set up gear variables
-currentRatio = 2; % Ratio of first gear set
-
 % Table of initial gear properties
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
-gearData = [4,19,1,1;6,52,1,1;2.8,19,2,1;6,52,2,1];
+gearData = [4,19,1,1;10,52,1,1;3.8,19,2,1;6,52,2,1];
 gearData(:, 4) = getKE(gearData);
 
 % Data structures to store each optimization trial
@@ -41,6 +38,8 @@ global trialStruct;
 trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 corresponds to success
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
+global currentRatio;
+currentRatio = 2.5; % Ratio of first gear set
 
 % Perform optimization
 [minKE, failed] = stepRatio(1, gearData, [0, 0])
@@ -54,10 +53,26 @@ hold on;
 for i = 1:length(trialArray)
     if trialArray(i).success && checkConstraints([trialArray(i).gearData])
         successfulTrials = [successfulTrials trialArray(i)];
-        plot(i, trialArray(i).keTot, 'ro');
+        gearDataTempCurr = [trialArray(i).gearData];
+        if i~=1
+            gearDataTempLast = [trialArray(i-1).gearData];
+        end
+        if i~=1 && ((gearDataTempCurr(2, 1) / gearDataTempCurr(1,1)) - (gearDataTempLast(2, 1)/ gearDataTempLast(1, 1))) > 0.05
+            plot(i, trialArray(i).keTot, 'gx');
+        else
+            plot(i, trialArray(i).keTot, 'ro');
+        end
     else 
         failedTrials = [failedTrials trialArray(i)];
-        plot(i, trialArray(i).keTot, 'ko');
+        gearDataTempCurr = [trialArray(i).gearData];
+        if i~=1
+            gearDataTempLast = [trialArray(i-1).gearData];
+        end
+        if i~=1 && (gearDataTempCurr(2, 1) / gearDataTempCurr(1,1)) - (gearDataTempLast(2, 1)/ gearDataTempLast(1, 1)) > 0.05
+            plot(i, trialArray(i).keTot, 'gx');
+        else
+            plot(i, trialArray(i).keTot, 'ko');
+        end
     end
 end
 hold off;
