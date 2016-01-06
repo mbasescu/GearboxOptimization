@@ -1,8 +1,8 @@
-function [ke, failed] = stepRatio(firstInstance, gearData, failState)
-% stepRatio(firstInstance, gearData, failState) -
+function [ke, failed] = stepFace1(firstInstance, gearData, failState)
+% stepFace1(firstInstance, gearData, failState) -
 %
 % This function takes three inputs:
-% 
+%
 % - 'firstInstance' is a boolean (0 or 1) describing whether or not this
 % function is being called from a higher level function, or whether it is
 % recursing
@@ -16,7 +16,8 @@ function [ke, failed] = stepRatio(firstInstance, gearData, failState)
 %
 % Once finished recursing, this function returns 'ke', the minimum value of kinetic energy it has
 % achieved before leaving this level of recursion (popping back up to the
-% next highest parameter).
+% next highest parameter).  However, if a choice could not be made for this
+% parameter that prevents failure, the second return value will be set to 1
 
 % Setup/initialization
 finished = 0;
@@ -25,28 +26,30 @@ failed = 0;
 % Declare globals
 global trialStruct;
 global trialArray;
-global stepSize;
 global currentRatio;
+global stepSize;
+persistent faceLast;
+persistent faceBeforeLast;
 persistent keLast;
 persistent keBeforeLast;
-persistent ratioBeforeLast;
-persistent keHist; % History of kinetic energies
-persistent counter;
-if isempty(counter)
-    counter = 0;
+persistent keHist;
+persistent count;
+
+if isempty(count)
+    count = 0;
+else
+    count = count + 1
 end
 
-counter = counter + 1
-
-% First find information about last time's gear set
-ratioLast = gearData(2, 1) / gearData(1, 1);
-
+faceLast = gearData(1, 3);
+    
 % If this function is not currently recursing
 if firstInstance
-    % Optimize over current state first
+    keHist = [];
+    
+    % First optimize over the current state
     gearData = ratios(gearData, currentRatio);
-    ratioLast = gearData(2, 1) / gearData(1, 1);
-    [keLast, subFailedLast] = stepFace1(1, gearData, [0, 0]);
+    [keLast, subFailedLast] = stepD2(1, gearData, [0, 0]);
     keHist = [keHist, keLast];
     
     % Save best diameters
@@ -55,44 +58,42 @@ if firstInstance
     gearData(3, 1) = gearDataTemp(3, 1);
     
     keBeforeLast = keLast;
-    ratioBeforeLast = ratioLast;
-
+    faceBeforeLast = faceLast;
     % Set the initial failure state
     if subFailedLast
         failState = 1;
     else
         failState = 0;
     end
-end
+end 
 
 % Decide which way and how much to step
 if firstInstance % First time through, just go bigger
     change = stepSize;
-elseif keLast < keBeforeLast % Keep going in the same direction if ke is decreasing
-    change = sign(ratioLast - ratioBeforeLast)*stepSize;
+elseif keLast < keBeforeLast || keLast == keBeforeLast % Keep going in the same direction if ke is decreasing
+    change = sign(faceLast - faceBeforeLast)*stepSize;
 elseif keLast > keBeforeLast % If ke is getting worse, go in the other direction
-    change = -sign(ratioLast - ratioBeforeLast)*stepSize;
-elseif keLast == keBeforeLast
-    % CLEAN UP AND LEAVE
+    change = -sign(faceLast - faceBeforeLast)*stepSize;
 end
 
-% Step the ratio
-steppedRatio = ratioLast + abs(change);
-currentRatio = steppedRatio;
-steppedGearData = ratios(gearData, steppedRatio);
+% Step the face size
+steppedFace = faceLast + change;
+steppedGearData = gearData;
+steppedGearData(1, 3) = steppedFace;
+steppedGearData(2, 3) = steppedFace;
 
-% Now optimize over this new ratio
-[keCurr, steppedFailState] = stepFace1(1, steppedGearData, [0, 0]);
+% Now optimize over this new face size
+[keCurr, steppedFailState] = stepD2(1, steppedGearData, [0, 0]);
 
 % If the lowest kinetic energy has not been updated for at least 7 iterations, kick out
 minIndices = find(keHist == min(keHist));
-minIndex = minIndices(end);
+minIndex = minIndices(1);
 if minIndex <= length(keHist) - 7
     finished = 1;
 end
 
 % Set the before last values
-ratioBeforeLast = ratioLast;
+faceBeforeLast = faceLast;
 keBeforeLast = keLast;
 keLast = keCurr;
 keHist = [keHist, keLast];
@@ -103,9 +104,8 @@ if finished
     failed = 0;
     ke = min(keHist);
     return;
-else 
+else
     % Recurse if we're not done yet
-    [ke, failed] = stepRatio(0, steppedGearData, steppedFailState);
+    [ke, failed] = stepFace1(0, steppedGearData, steppedFailState);
 end
-
 end

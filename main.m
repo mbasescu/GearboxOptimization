@@ -42,12 +42,13 @@ global currentRatio;
 currentRatio = 2.5; % Ratio of first gear set
 
 % Perform optimization
-[minKE, failed] = stepRatio(1, gearData, [0, 0])
+[minKE, failed] = stepFace1(1, gearData, [0, 0])
 
 successfulTrials = [];
 failedTrials = [];
 
 hold on;
+set(gca, 'yscale', 'log');
 % Identify succesful trials and unsuccessful trials, plot success in red
 % and failure in black
 for i = 1:length(trialArray)
@@ -57,8 +58,8 @@ for i = 1:length(trialArray)
         if i~=1
             gearDataTempLast = [trialArray(i-1).gearData];
         end
-        if i~=1 && ((gearDataTempCurr(2, 1) / gearDataTempCurr(1,1)) - (gearDataTempLast(2, 1)/ gearDataTempLast(1, 1))) > 0.05
-            plot(i, trialArray(i).keTot, 'gx');
+        if i~=1 && abs(gearDataTempCurr(1, 3) - gearDataTempLast(1, 3)) > 0.05
+            plot(i, trialArray(i).keTot, 'bd');
         else
             plot(i, trialArray(i).keTot, 'ro');
         end
@@ -68,8 +69,8 @@ for i = 1:length(trialArray)
         if i~=1
             gearDataTempLast = [trialArray(i-1).gearData];
         end
-        if i~=1 && (gearDataTempCurr(2, 1) / gearDataTempCurr(1,1)) - (gearDataTempLast(2, 1)/ gearDataTempLast(1, 1)) > 0.05
-            plot(i, trialArray(i).keTot, 'gx');
+        if i~=1 && abs(gearDataTempCurr(1, 3) - gearDataTempLast(1, 3)) > 0.05
+            plot(i, trialArray(i).keTot, 'bd');
         else
             plot(i, trialArray(i).keTot, 'ko');
         end
