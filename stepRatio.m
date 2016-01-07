@@ -46,7 +46,7 @@ if firstInstance
     % Optimize over current state first
     gearData = ratios(gearData, currentRatio);
     ratioLast = gearData(2, 1) / gearData(1, 1);
-    [keLast, subFailedLast] = stepFace1(1, gearData, [0, 0]);
+    [keLast, subFailedLast] = stepD2(1, gearData, [0, 0]);
     keHist = [keHist, keLast];
     
     % Save best diameters
@@ -82,8 +82,12 @@ currentRatio = steppedRatio;
 steppedGearData = ratios(gearData, steppedRatio);
 
 % Now optimize over this new ratio
-[keCurr, steppedFailState] = stepFace1(1, steppedGearData, [0, 0]);
-
+[keCurr, steppedFailState] = stepD2(1, steppedGearData, [0, 0]);
+% Save best diameters
+gearDataTemp = [trialStruct.gearData];
+gearData(1, 1) = gearDataTemp(1, 1);
+gearData(3, 1) = gearDataTemp(3, 1);
+    
 % If the lowest kinetic energy has not been updated for at least 7 iterations, kick out
 minIndices = find(keHist == min(keHist));
 minIndex = minIndices(end);

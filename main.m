@@ -30,7 +30,7 @@ pitch2 = 10;
 
 % Table of initial gear properties
 % Column headers: 'Pitch Diameter', '# of Teeth', 'Face Width', 'KE'
-gearData = [4,19,1,1;10,52,1,1;3.8,19,2,1;6,52,2,1];
+gearData = [2.8,19,1,1;8.4,52,1,1;3.5,19,2,1;6,52,2,1];
 gearData(:, 4) = getKE(gearData);
 
 % Data structures to store each optimization trial
@@ -39,16 +39,15 @@ trialStruct = struct('gearData', [], 'keTot', 0, 'success', 0); % success = 1 co
 global trialArray;
 trialArray = []; % Stores each attempt of parameter combinations
 global currentRatio;
-currentRatio = 2.5; % Ratio of first gear set
+currentRatio = 3; % Ratio of first gear set
 
 % Perform optimization
-[minKE, failed] = stepFace1(1, gearData, [0, 0])
+[minKE, failed] = stepRatio(1, gearData, [0, 0])
 
 successfulTrials = [];
 failedTrials = [];
 
 hold on;
-set(gca, 'yscale', 'log');
 % Identify succesful trials and unsuccessful trials, plot success in red
 % and failure in black
 for i = 1:length(trialArray)
@@ -58,7 +57,7 @@ for i = 1:length(trialArray)
         if i~=1
             gearDataTempLast = [trialArray(i-1).gearData];
         end
-        if i~=1 && abs(gearDataTempCurr(1, 3) - gearDataTempLast(1, 3)) > 0.05
+        if i~=1 && abs(gearDataTempCurr(3, 3) - gearDataTempLast(3, 3)) > 0.05
             plot(i, trialArray(i).keTot, 'bd');
         else
             plot(i, trialArray(i).keTot, 'ro');
@@ -69,7 +68,7 @@ for i = 1:length(trialArray)
         if i~=1
             gearDataTempLast = [trialArray(i-1).gearData];
         end
-        if i~=1 && abs(gearDataTempCurr(1, 3) - gearDataTempLast(1, 3)) > 0.05
+        if i~=1 && abs(gearDataTempCurr(3, 3) - gearDataTempLast(3, 3)) > 0.05
             plot(i, trialArray(i).keTot, 'bd');
         else
             plot(i, trialArray(i).keTot, 'ko');
